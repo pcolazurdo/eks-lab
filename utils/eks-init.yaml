@@ -1,0 +1,80 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: eks-workshop
+  region: us-east-2
+
+cloudWatch:
+  clusterLogging:
+    # enable specific types of cluster control plane logs
+    enableTypes: ["audit", "authenticator", "controllerManager", "scheduler", "api"]
+    # all supported types: "api", "audit", "authenticator", "controllerManager", "scheduler"
+    # supported special values: "*" and "all"
+
+fargateProfiles:
+  - name: fp-fargate
+    selectors:
+      # All workloads in the "default" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: fargate
+    #   # All workloads in the "kube-system" Kubernetes namespace will be
+    #   # scheduled onto Fargate:
+    #   - namespace: kube-system
+  - name: fp-dev
+    selectors:
+      # All workloads in the "dev" Kubernetes namespace matching the following
+      # label selectors will be scheduled onto Fargate:
+      - namespace: dev
+        labels:
+          env: dev
+          checks: passed
+          
+nodeGroups:
+  - name: nodegroup-1
+    # instanceType: t3.small
+    ami: auto-ssm
+    labels: { role: workers }
+    # desiredCapacity: 10
+    minSize: 2
+    maxSize: 5
+    instancesDistribution:
+        maxPrice: 0.017
+        instanceTypes: ["t3.small", "t3.medium"] # At least one instance type should be specified
+        onDemandBaseCapacity: 0
+        onDemandPercentageAboveBaseCapacity: 50
+        spotInstancePools: 2
+    asgMetricsCollection:
+      - granularity: 1Minute
+        metrics:
+          - GroupMinSize
+          - GroupMaxSize
+          - GroupDesiredCapacity
+          - GroupInServiceInstances
+          - GroupPendingInstances
+          - GroupStandbyInstances
+          - GroupTerminatingInstances
+          - GroupTotalInstances
+    privateNetworking: true
+    ssh: # use existing EC2 key but don't allow SSH access to nodegroup.
+      publicKeyName: us-east-2
+      allow: true
+    iam:
+      withAddonPolicies:
+        ebs: true
+        fsx: true
+        efs: true
+        autoScaler: true
+        appMesh: true
+        appMeshPreview: true
+        albIngress: true
+        xRay: true
+        cloudWatch: true
+    volumeSize: 80
+    
+#   - name: ng-2
+#     instanceType: m5.xlarge
+#     desiredCapacity: 2
+#     volumeSize: 100
+#     ssh:
+#       publicKeyPath: ~/.ssh/ec2_id_rsa.pub
