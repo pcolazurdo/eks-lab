@@ -72,6 +72,88 @@ nodeGroups:
         cloudWatch: true
     volumeSize: 80
     
+  - name: nodegroup-2
+    # instanceType: t3.small
+    ami: auto-ssm
+    labels: { role: workers }
+    # desiredCapacity: 10
+    minSize: 2
+    maxSize: 5
+    instancesDistribution:
+        maxPrice: 0.035
+        instanceTypes: ["t3.large", "t3.xlarge"] # At least one instance type should be specified
+        onDemandBaseCapacity: 0
+        onDemandPercentageAboveBaseCapacity: 50
+        spotInstancePools: 2
+    asgMetricsCollection:
+      - granularity: 1Minute
+        metrics:
+          - GroupMinSize
+          - GroupMaxSize
+          - GroupDesiredCapacity
+          - GroupInServiceInstances
+          - GroupPendingInstances
+          - GroupStandbyInstances
+          - GroupTerminatingInstances
+          - GroupTotalInstances
+    privateNetworking: true
+    ssh: # use existing EC2 key but don't allow SSH access to nodegroup.
+      publicKeyName: us-east-2
+      allow: true
+    iam:
+      withAddonPolicies:
+        ebs: true
+        fsx: true
+        efs: true
+        autoScaler: true
+        appMesh: true
+        appMeshPreview: true
+        albIngress: true
+        xRay: true
+        cloudWatch: true
+    volumeSize: 80
+    
+  - name: nodegroup-3
+    # instanceType: t3.small
+    ami: auto-ssm
+    labels: { role: workers }
+    # desiredCapacity: 10
+    minSize: 2
+    maxSize: 5
+    instancesDistribution:
+        maxPrice: 0.035
+        instanceTypes: ["t3.large", "t3.xlarge"] # At least one instance type should be specified
+        onDemandBaseCapacity: 0
+        onDemandPercentageAboveBaseCapacity: 50
+        spotInstancePools: 2
+    asgMetricsCollection:
+      - granularity: 1Minute
+        metrics:
+          - GroupMinSize
+          - GroupMaxSize
+          - GroupDesiredCapacity
+          - GroupInServiceInstances
+          - GroupPendingInstances
+          - GroupStandbyInstances
+          - GroupTerminatingInstances
+          - GroupTotalInstances
+    privateNetworking: true
+    ssh: # use existing EC2 key but don't allow SSH access to nodegroup.
+      publicKeyName: us-east-2
+      allow: true
+      enableSsm: true
+    iam:
+      withAddonPolicies:
+        ebs: true
+        fsx: true
+        efs: true
+        autoScaler: true
+        appMesh: true
+        appMeshPreview: true
+        albIngress: true
+        xRay: true
+        cloudWatch: true
+    volumeSize: 80
 #   - name: ng-2
 #     instanceType: m5.xlarge
 #     desiredCapacity: 2
